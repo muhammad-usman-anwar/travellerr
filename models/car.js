@@ -12,6 +12,7 @@ const carSchema = new Schema({
     },
     license: {
         type: String,
+        unique: true,
         required: true
     },
     userId: {

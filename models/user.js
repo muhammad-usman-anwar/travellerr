@@ -20,6 +20,7 @@ const userSchema = new Schema({
     },
     cnic: {
         type: Number,
+        unique:true,
         required: true
     },
     dateOfBirth: {
