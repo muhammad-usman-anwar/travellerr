@@ -25,7 +25,7 @@ router.put('/add', is_auth, [
     body('manufacturer').trim().not().isEmpty(),
 ], carController.add)
 
-router.delete('/remove', is_auth, [
+router.post('/remove', is_auth, [
     body('license').trim().not().isEmpty()
 ], carController.remove)
 

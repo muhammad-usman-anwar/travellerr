@@ -22,7 +22,7 @@ exports.add = (req, res, next) => {
 }
 
 exports.remove = (req, res, next) => {
-    Car.findOneAndRemove({
+    Car.findOneAndDelete({
             license: req.body.license,
             userId: req.userId
         })
