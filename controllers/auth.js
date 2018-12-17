@@ -35,7 +35,7 @@ exports.signup = (req, response, next) => {
             return user.save()
         })
         .then(result => {
-            response.status(201).send({
+            response.status(201).json({
                 message: 'User Created!',
                 userId: result._id
             })
@@ -78,7 +78,7 @@ exports.signin = (req, res, next) => {
             console.log(`Logged in : ${loadedUser.firstName}`)
             res
                 .status(200)
-                .send({
+                .json({
                     token: token,
                     expiresIn: 3600
                 })

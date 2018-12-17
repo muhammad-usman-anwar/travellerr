@@ -9,7 +9,7 @@ exports.add = (req, res, next) => {
         license: req.body.license,
         userId: req.userId
     }).save().then(result => {
-        res.status(201).send({
+        res.status(201).json({
             message: 'Car Added',
             error: "false"
         })
@@ -28,7 +28,7 @@ exports.remove = (req, res, next) => {
         })
         .then(result => {
             console.log(result)
-            res.status(200).send({
+            res.status(200).json({
                 message: 'Car removed'
             })
         }).catch(err => {
@@ -61,11 +61,11 @@ exports.read = (req, res, next) => {
         userId: req.userId
     }).then(carDoc => {
         if (!carDoc) {
-            res.status(401).send({
+            res.status(401).json({
                 message: "No car registered"
             })
         }
-        res.status(200).send(JSON.stringify(carDoc))
+        res.status(200).json(JSON.stringify(carDoc))
     }).catch(err => {
         if (!err.statusCode) {
             err.statusCode = 500
