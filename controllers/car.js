@@ -40,15 +40,20 @@ exports.remove = (req, res, next) => {
 }
 
 exports.update = (req, res, next) => {
-    Car.findOne({
-            license: req.body.license,
-            userId: req.userId
+    const car = new Car({
+      userId: req.userId,
+      model: req.body.model,
+      manufacturer: req.body.manufacturer,
+      license: req.body.license  
+    })
+    Car.updateOne({
+        license: req.body.license,
+        userId: req.userId
+    }, car)
+        .then(result => {
+            res.status(200).json({error: false, message: 'updated'})
         })
-        .then(carDoc => {
-            carDoc.model = req.body.model
-            carDoc.manufacturer = req.body.manufacturer
-            carDoc.update()
-        }).catch(err => {
+        .catch(err => {
             if (!err.statusCode) {
                 err.statusCode = 500
             }
@@ -65,7 +70,7 @@ exports.read = (req, res, next) => {
                 message: "No car registered"
             })
         }
-        res.status(200).json(JSON.stringify(carDoc))
+        res.status(200).json({error:'flase', data: carDoc})
     }).catch(err => {
         if (!err.statusCode) {
             err.statusCode = 500

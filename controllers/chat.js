@@ -2,20 +2,18 @@ const Chat = require('../models/chat')
 
 exports.list = (req, res, next) => {
     Chat.find({
-        users: { 
-            userId: req.userId 
-        }
+        users: req.userId 
     }).then(chatDocs => {
         if(!chatDocs) res.status(401).json({ message: 'No chats of the user'})
         else{
             let chats = [];
-            carDocs.forEach(carDoc => {
+            chatDocs.forEach(chatDoc => {
                 chats.push({
-                    id: carDoc._id,
-                    users: carDoc.users
+                    id: chatDoc._id,
+                    users: chatDoc.users
                 })
             })
-            res.status(200).json(chats)
+            res.status(200).json({list: chats})
         }
     }).catch(err => {
         if(!err.statusCode) err.statusCode = 500
@@ -24,10 +22,10 @@ exports.list = (req, res, next) => {
 }
 
 exports.read = (req, res, next) => {
-    Chat.findOne({ _id: req.param.id})
+    Chat.findOne({ _id: req.params.id})
     .then(chatDoc => {
         if(!chatDoc) res.status(401).json({message: 'Invalid chat id'})
-        else res.status(200).json(chatDoc)
+        else res.status(200).json({chat: chatDoc.messages})
     })
     .catch(err => {
         if(!err.statusCode) err.statusCode = 500
@@ -36,7 +34,7 @@ exports.read = (req, res, next) => {
 }
 
 exports.insert = (req, res, next) => {
-    Chat.findOne({ _id: req.param.id})
+    Chat.findOne({ _id: req.body.chatId})
     .then(chatDoc => {
         if(!chatDoc) res.status(401).json({message: 'Invalid chat id'})
         else {
@@ -45,6 +43,7 @@ exports.insert = (req, res, next) => {
                 message: req.body.message
             })
             chatDoc.save()
+            res.status(200).json({error: false})
         }
     })
     .catch(err => {
