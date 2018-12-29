@@ -3,16 +3,28 @@ const Schema = mongoose.Schema
 
 const postSchema = new Schema({
     Origin: {
-        type: String,
-        required: true
+        latitude:{
+            type: String,
+            required: true
+        },
+        longitude:{
+            type: String,
+            required: true
+        }
     },
     Time: {
         type: String,
         required: true
     },
     Destination: {
-        type: String,
-        required: true
+        latitude:{
+            type: String,
+            required: true
+        },
+        longitude:{
+            type: String,
+            required: true
+        }
     },
     description: {
         type: String,

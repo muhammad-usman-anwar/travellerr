@@ -3,23 +3,31 @@ const Schema = mongoose.Schema
 
 const tripSchema = new Schema({
     Origin: {
-        type: String,
-        required: true
+        latitude:{
+            type: String,
+            required: true
+        },
+        longitude:{
+            type: String,
+            required: true
+        }
     },
     startTime: {
         type: String,
         required: true
     },
     Destination: {
-        type: String,
-        required: true
+        latitude:{
+            type: String,
+            required: true
+        },
+        longitude:{
+            type: String,
+            required: true
+        }
     },
     arrivalTime: {
         type: String,
-        required: true
-    },
-    distanceTravelled: {
-        type: Number,
         required: true
     },
     postId: {
@@ -28,11 +36,9 @@ const tripSchema = new Schema({
         required: true
     },
     users: [{
-        userId: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     }],
     carId: {
         type: Schema.Types.ObjectId,
