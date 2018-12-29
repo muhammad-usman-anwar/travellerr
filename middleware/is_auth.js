@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const EmailService = require('../emailService')
 
 module.exports = (req, res, next) => {
     if (!req.get('Token')) {

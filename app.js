@@ -7,6 +7,7 @@ const carRoutes = require('./routes/car')
 const chatRoutes = require('./routes/chat')
 const postRoutes = require('./routes/post')
 const tripRoutes = require('./routes/trip')
+const EmailService = require('./emailService')
 
 const app = express()
 
@@ -40,6 +41,7 @@ mongoose
     })
     .then(result => {
         const server = app.listen(3030)
+        EmailService.init('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')
         const io = require('./socket').init(server)
     })
     .catch(err => {
