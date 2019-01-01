@@ -58,59 +58,21 @@ exports.remove = (req, res, next) => {
 };
 
 exports.update = (req, res, next) => {
-<<<<<<< HEAD
-    const car = new Car({
-      userId: req.userId,
-      model: req.body.model,
-      manufacturer: req.body.manufacturer,
-      license: req.body.license  
-    })
-    Car.updateOne({
-        license: req.body.license,
-        userId: req.userId
-    }, car)
-        .then(result => {
-            res.status(200).json({error: false, message: 'updated'})
-        })
-        .catch(err => {
-            if (!err.statusCode) {
-                err.statusCode = 500
-            }
-            next(err)
-        })
-}
-
-exports.read = (req, res, next) => {
-    Car.find({
-        userId: req.userId
-    }).then(carDoc => {
-        if (!carDoc) {
-            res.status(401).json({
-                message: "No car registered"
-            })
-        }
-        res.status(200).json({error:'flase', data: carDoc})
-    }).catch(err => {
-        if (!err.statusCode) {
-            err.statusCode = 500
-        }
-        next(err)
-=======
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    throw error;
-  }
-  Car.findOne({
-    license: req.body.license,
-    userId: req.userId
-  })
-    .then(carDoc => {
-      carDoc.model = req.body.model;
-      carDoc.manufacturer = req.body.manufacturer;
-      carDoc.update();
+  const car = new Car({
+    userId: req.userId,
+    model: req.body.model,
+    manufacturer: req.body.manufacturer,
+    license: req.body.license
+  });
+  Car.updateOne(
+    {
+      license: req.body.license,
+      userId: req.userId
+    },
+    car
+  )
+    .then(result => {
+      res.status(200).json({ error: false, message: "updated" });
     })
     .catch(err => {
       if (!err.statusCode) {
@@ -130,8 +92,13 @@ exports.read = (req, res, next) => {
           message: "No car registered"
         });
       }
-      res.status(200).json(JSON.stringify(carDoc));
->>>>>>> child
+      res.status(200).json({ error: "flase", data: carDoc });
+    })
+    .catch(err => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
     })
     .catch(err => {
       if (!err.statusCode) {

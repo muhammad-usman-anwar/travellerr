@@ -54,8 +54,8 @@ exports.edit = (res, req, next) => {
         latitude: req.body.destination.latitude,
         longitude: req.body.destination.longitude
       },
-      description: req.body.description,
-      chatId: req.body.chatId
+      description: req.body.description || null,
+      chatId: req.body.chatId || null
     }
   )
     .then(result => {

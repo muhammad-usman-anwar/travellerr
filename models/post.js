@@ -35,13 +35,11 @@ const postSchema = new Schema({
     ref: "User",
     required: true
   },
-  interestedUsers: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true
-    }
-  ]
+  chatId: {
+    type: Schema.Types.ObjectId,
+    ref: "Chat",
+    required: true
+  }
 });
 
 module.exports = mongoose.model("Post", postSchema);
