@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 234 85">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #666;
+      }
+
+      .cls-1 {
+        font-size: 40px;
+      }
+
+      .cls-1, .cls-3 {
+        font-family: SegoeUI-Bold, Segoe UI;
+        font-weight: 700;
+      }
+
+      .cls-3 {
+        fill: #39b54a;
+        font-size: 60px;
+      }
+    </style>
+  </defs>
+  <g id="logo" transform="translate(-110 -168)">
+    <text id="traveller" class="cls-1" transform="translate(110 233)"><tspan x="0" y="0">traveller</tspan></text>
+    <ellipse id="Ellipse_1" data-name="Ellipse 1" class="cls-2" cx="37" cy="36.5" rx="37" ry="36.5" transform="translate(270 180)"/>
+    <text id="r" class="cls-3" transform="translate(288 233)"><tspan x="0" y="0">r</tspan></text>
+  </g>
+</svg>
