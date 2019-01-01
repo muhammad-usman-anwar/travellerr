@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const IO = require("../socket");
+const EmailService = require("../emailService");
 
 const { validationResult } = require("express-validator/check");
 const bcrypt = require("bcryptjs");
@@ -15,7 +16,7 @@ exports.signup = (req, response, next) => {
   }
   IO.getIO().on("connection", socket => {
     const code = Math.round(Math.random() * 1000000);
-    socket.emit("code", { code: code });
+    EmailService.sendVerificationMail(req.body.email, code);
     socket.on("verify", data => {
       if (!data.code) {
         socket.disconnect(true);
