@@ -14,6 +14,7 @@ exports.signup = (req, response, next) => {
     error.data = errors.array();
     throw error;
   }
+  res.status(200).json({ error: false, message: "data recieved" });
   IO.getIO().on("connection", socket => {
     const code = Math.round(Math.random() * 1000000);
     EmailService.sendVerificationMail(req.body.email, code);
@@ -53,16 +54,10 @@ exports.signup = (req, response, next) => {
           return user.save();
         })
         .then(result => {
-          response.status(201).json({
-            message: "User Created!",
-            userId: result._id
-          });
+          socket.emit("message", { error: false, message: "user created" });
         })
         .catch(err => {
-          if (!err.statusCode) {
-            err.statusCode = 500;
-          }
-          next(err);
+          socket.emit("message", { error: ture, message: err.message });
         });
     });
   });
