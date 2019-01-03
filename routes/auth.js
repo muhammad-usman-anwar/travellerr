@@ -3,6 +3,7 @@ const { body } = require("express-validator/check");
 
 const User = require("../models/user");
 const authController = require("../controllers/auth");
+const is_auth = require("../middleware/is_auth");
 
 const router = express.Router();
 
@@ -59,5 +60,7 @@ router.post(
   ],
   authController.signin
 );
+
+router.get("/", is_auth, authController.details);
 
 module.exports = router;

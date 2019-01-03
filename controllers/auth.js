@@ -114,3 +114,22 @@ exports.signin = (req, res, next) => {
       next(err);
     });
 };
+
+exports.details = (req, res, next) => {
+  User.findOne({ _id: req.userId })
+    .then(details => {
+      if (!details) {
+        const error = new Error("Error");
+        error.statusCode = 401;
+        throw error;
+      } else {
+        res.status(200).json({ data: details });
+      }
+    })
+    .catch(err => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};

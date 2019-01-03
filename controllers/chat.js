@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator/check");
 
 const Chat = require("../models/chat");
+const User = require("../models/user");
 
 exports.list = (req, res, next) => {
   Chat.find({
@@ -9,19 +10,8 @@ exports.list = (req, res, next) => {
     .then(chatDocs => {
       if (!chatDocs) res.status(401).json({ message: "No chats of the user" });
       else {
-        let chats = [];
-        chatDocs.forEach(chatDoc => {
-          chats.push({
-            id: chatDoc._id,
-            users: chatDoc.users
-          });
-        });
-        res.status(200).json({ list: chats });
+        res.status(200).json({ list: chatDocs });
       }
-    })
-    .catch(err => {
-      if (!err.statusCode) err.statusCode = 500;
-      next(err);
     })
     .catch(err => {
       if (!err.statusCode) err.statusCode = 500;
