@@ -5,6 +5,13 @@ const Post = require("../models/post");
 exports.read = (req, res, next) => {};
 
 exports.add = (res, req, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation Failed");
+    error.statusCode = 422;
+    error.data = errors.array();
+    throw error;
+  }
   new Post({
     userId: req.userId,
     origin: {
@@ -17,7 +24,7 @@ exports.add = (res, req, next) => {
       longitude: req.body.destination.longitude
     },
     description: req.body.description || null,
-    interestedUsers: req.body.userId
+    interested: req.body.userId
   })
     .save()
     .then(result => {
@@ -30,7 +37,7 @@ exports.add = (res, req, next) => {
       console.log(err);
       const error = new Error("Internal error");
       error.statusCode = 401;
-      throw error;
+      next(error);
     });
 };
 
@@ -68,6 +75,24 @@ exports.edit = (res, req, next) => {
       console.log(err);
       const error = new Error("Internal error");
       error.statusCode = 401;
-      throw error;
+      next(error);
     });
+};
+
+exports.interested = async (req, res, next) => {
+  try {
+    const postDoc = await Post.findById(req.params.id);
+    const interested = postDoc.interested;
+    for (let index = 0; index < interested.length; index++) {
+      const element = interested[index];
+      if (element == req.userId) throw new Error("Allready set");
+    }
+    interested.push(req.userId);
+    postDoc.interested = interested;
+    postDoc.save();
+    res.status(201).json({ error: false, message: "added" });
+  } catch (err) {
+    if (!err.statusCode) err.statusCode = 500;
+    next(err);
+  }
 };

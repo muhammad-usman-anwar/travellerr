@@ -35,9 +35,9 @@ const postSchema = new Schema({
     ref: "User",
     required: true
   },
-  chatId: {
+  interested: {
     type: Schema.Types.ObjectId,
-    ref: "Chat",
+    ref: "User",
     required: true
   }
 });
