@@ -1,10 +1,50 @@
 const { validationResult } = require("express-validator/check");
 
 const Post = require("../models/post");
+const User = require("../models/user");
 
-exports.read = (req, res, next) => {};
+exports.read = async (req, res, next) => {
+  try {
+    let users = [];
+    let user;
+    const resData = [];
+    const postDocs = await Post.find();
+    for (let index = 0; index < postDocs.length; index++) {
+      const doc = postDocs[index];
+      for (let i = 0; i < doc.interested.length; i++) {
+        const id = doc.interested[i];
+        const userDoc = await User.findById(id);
+        users.push({
+          id: userDoc._id,
+          name: `${userDoc.firstName} ${userDoc.lastName}`
+        });
+        if (req.userId == userDoc._id) {
+          user = {
+            id: userDoc._id,
+            name: `${userDoc.firstName} ${userDoc.lastName}`
+          };
+        }
+      }
+      resData.push({
+        user: user,
+        time: doc.time,
+        origin: doc.origin,
+        destination: doc.destination,
+        description: doc.description,
+        interested: users
+      });
+      user = [];
+    }
+    res.status(200).json({ data: resData });
+  } catch (err) {
+    if (!err.statusCode) err.statusCode = 500;
+    next(err);
+  }
+};
 
-exports.add = (res, req, next) => {
+exports.add = (req, res, next) => {
+  console.log("Testing:\t" + req.body);
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new Error("Validation Failed");
@@ -15,22 +55,22 @@ exports.add = (res, req, next) => {
   new Post({
     userId: req.userId,
     origin: {
-      latitude: req.body.origin.latitude,
-      longitude: req.body.origin.longitude
+      latitude: req.body.origin_latitude,
+      longitude: req.body.origin_longitude
     },
-    time: new Date().getTime(),
+    time: req.body.time,
     destination: {
-      latitude: req.body.destination.latitude,
-      longitude: req.body.destination.longitude
+      latitude: req.body.destination_latitude,
+      longitude: req.body.destination_longitude
     },
     description: req.body.description || null,
-    interested: req.body.userId
+    interested: [req.userId]
   })
     .save()
     .then(result => {
       res.status(201).json({
         message: "Post Added",
-        error: "false"
+        error: false
       });
     })
     .catch(err => {

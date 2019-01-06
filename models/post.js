@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const postSchema = new Schema({
-  Origin: {
+  origin: {
     latitude: {
       type: String,
       required: true
@@ -12,11 +12,11 @@ const postSchema = new Schema({
       required: true
     }
   },
-  Time: {
+  time: {
     type: String,
     required: true
   },
-  Destination: {
+  destination: {
     latitude: {
       type: String,
       required: true
@@ -35,11 +35,13 @@ const postSchema = new Schema({
     ref: "User",
     required: true
   },
-  interested: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true
-  }
+  interested: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    }
+  ]
 });
 
 module.exports = mongoose.model("Post", postSchema);

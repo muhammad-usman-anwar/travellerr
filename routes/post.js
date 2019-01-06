@@ -10,7 +10,7 @@ const router = express.Router();
 router.get("/", is_auth, postController.read);
 
 router.patch(
-  "/post",
+  "/",
   is_auth,
   [
     body("postId").custom((value, { req }) => {
@@ -27,10 +27,14 @@ router.patch(
 );
 
 router.put(
-  "/post/new",
+  "/new",
   is_auth,
   [
-    body("origin")
+    body("origin_latitude")
+      .trim()
+      .not()
+      .isEmpty(),
+    body("origin_longitude")
       .trim()
       .not()
       .isEmpty(),
@@ -38,11 +42,16 @@ router.put(
       .trim()
       .not()
       .isEmpty(),
-    body("destination").trim()
+    body("destination_latitude")
+      .not()
+      .isEmpty(),
+    body("destination_longitude")
+      .not()
+      .isEmpty()
   ],
   postController.add
 );
 
-router.get("/podt/:id/interested", is_auth, postController.interested);
+router.get("/:id/interested", is_auth, postController.interested);
 
 module.exports = router;
