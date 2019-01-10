@@ -18,7 +18,8 @@ exports.read = async (req, res, next) => {
           id: userDoc._id,
           name: `${userDoc.firstName} ${userDoc.lastName}`
         });
-        if (req.userId == userDoc._id) {
+
+        if (doc.userId.toString() == userDoc._id.toString()) {
           user = {
             id: userDoc._id,
             name: `${userDoc.firstName} ${userDoc.lastName}`
@@ -33,8 +34,9 @@ exports.read = async (req, res, next) => {
         description: doc.description,
         interested: users
       });
-      user = [];
+      users = [];
     }
+
     res.status(200).json({ data: resData });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
