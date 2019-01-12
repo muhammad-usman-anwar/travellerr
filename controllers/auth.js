@@ -104,6 +104,7 @@ exports.signin = (req, res, next) => {
       console.log(`Logged in : ${loadedUser.firstName}`);
       res.status(200).json({
         token: token,
+        id: loadedUser._id,
         expiresIn: 3600
       });
     })

@@ -2,17 +2,21 @@ const { validationResult } = require("express-validator/check");
 
 const Post = require("../models/post");
 const User = require("../models/user");
+const IO = require("../socket");
 
 exports.read = async (req, res, next) => {
   try {
     let users = [];
     let user;
+    let interestedFlag;
     const resData = [];
     const postDocs = await Post.find();
     for (let index = 0; index < postDocs.length; index++) {
       const doc = postDocs[index];
       for (let i = 0; i < doc.interested.length; i++) {
         const id = doc.interested[i];
+        if (id.toString() == req.userId.toString()) interestedFlag = true;
+        else interestedFlag = false;
         const userDoc = await User.findById(id);
         users.push({
           id: userDoc._id,
@@ -27,12 +31,14 @@ exports.read = async (req, res, next) => {
         }
       }
       resData.push({
+        id: doc._id,
         user: user,
         time: doc.time,
         origin: doc.origin,
         destination: doc.destination,
         description: doc.description,
-        interested: users
+        interested: users,
+        interestedFlag: interestedFlag
       });
       users = [];
     }
@@ -70,6 +76,8 @@ exports.add = (req, res, next) => {
   })
     .save()
     .then(result => {
+      const io = IO.getIO();
+      io.emit("posts-updated");
       res.status(201).json({
         message: "Post Added",
         error: false
@@ -108,6 +116,8 @@ exports.edit = (res, req, next) => {
     }
   )
     .then(result => {
+      const io = IO.getIO();
+      io.emit("posts-updated");
       res.status(200).json({
         message: "Post Updated",
         error: "false"
@@ -132,6 +142,8 @@ exports.interested = async (req, res, next) => {
     interested.push(req.userId);
     postDoc.interested = interested;
     postDoc.save();
+    const io = IO.getIO();
+    io.emit("posts-updated", { message: "updated posts" });
     res.status(201).json({ error: false, message: "added" });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
