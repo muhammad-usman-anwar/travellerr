@@ -8,15 +8,12 @@ exports.read = async (req, res, next) => {
   try {
     let users = [];
     let user;
-    let interestedFlag;
     const resData = [];
     const postDocs = await Post.find();
     for (let index = 0; index < postDocs.length; index++) {
       const doc = postDocs[index];
       for (let i = 0; i < doc.interested.length; i++) {
         const id = doc.interested[i];
-        if (id.toString() == req.userId.toString()) interestedFlag = true;
-        else interestedFlag = false;
         const userDoc = await User.findById(id);
         users.push({
           id: userDoc._id,
@@ -37,8 +34,7 @@ exports.read = async (req, res, next) => {
         origin: doc.origin,
         destination: doc.destination,
         description: doc.description,
-        interested: users,
-        interestedFlag: interestedFlag
+        interested: users
       });
       users = [];
     }
@@ -133,6 +129,9 @@ exports.edit = (res, req, next) => {
 
 exports.interested = async (req, res, next) => {
   try {
+    console.log(req.params.id);
+    console.log("hi");
+
     const postDoc = await Post.findById(req.params.id);
     const interested = postDoc.interested;
     for (let index = 0; index < interested.length; index++) {
