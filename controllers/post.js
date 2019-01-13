@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator/check");
 
 const Post = require("../models/post");
 const User = require("../models/user");
+const IO = require("../socket");
 
 exports.read = async (req, res, next) => {
   try {
@@ -18,7 +19,8 @@ exports.read = async (req, res, next) => {
           id: userDoc._id,
           name: `${userDoc.firstName} ${userDoc.lastName}`
         });
-        if (req.userId == userDoc._id) {
+
+        if (doc.userId.toString() == userDoc._id.toString()) {
           user = {
             id: userDoc._id,
             name: `${userDoc.firstName} ${userDoc.lastName}`
@@ -26,6 +28,7 @@ exports.read = async (req, res, next) => {
         }
       }
       resData.push({
+        id: doc._id,
         user: user,
         time: doc.time,
         origin: doc.origin,
@@ -33,8 +36,9 @@ exports.read = async (req, res, next) => {
         description: doc.description,
         interested: users
       });
-      user = [];
+      users = [];
     }
+
     res.status(200).json({ data: resData });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
@@ -68,6 +72,8 @@ exports.add = (req, res, next) => {
   })
     .save()
     .then(result => {
+      const io = IO.getIO();
+      io.emit("posts-updated");
       res.status(201).json({
         message: "Post Added",
         error: false
@@ -106,6 +112,8 @@ exports.edit = (res, req, next) => {
     }
   )
     .then(result => {
+      const io = IO.getIO();
+      io.emit("posts-updated");
       res.status(200).json({
         message: "Post Updated",
         error: "false"
@@ -121,6 +129,9 @@ exports.edit = (res, req, next) => {
 
 exports.interested = async (req, res, next) => {
   try {
+    console.log(req.params.id);
+    console.log("hi");
+
     const postDoc = await Post.findById(req.params.id);
     const interested = postDoc.interested;
     for (let index = 0; index < interested.length; index++) {
@@ -130,6 +141,8 @@ exports.interested = async (req, res, next) => {
     interested.push(req.userId);
     postDoc.interested = interested;
     postDoc.save();
+    const io = IO.getIO();
+    io.emit("posts-updated", { message: "updated posts" });
     res.status(201).json({ error: false, message: "added" });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
