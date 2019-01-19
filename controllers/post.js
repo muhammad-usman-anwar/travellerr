@@ -1,4 +1,6 @@
-const { validationResult } = require("express-validator/check");
+const {
+  validationResult
+} = require("express-validator/check");
 
 const Post = require("../models/post");
 const User = require("../models/user");
@@ -39,7 +41,9 @@ exports.read = async (req, res, next) => {
       users = [];
     }
 
-    res.status(200).json({ data: resData });
+    res.status(200).json({
+      data: resData
+    });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
     next(err);
@@ -57,19 +61,19 @@ exports.add = (req, res, next) => {
     throw error;
   }
   new Post({
-    userId: req.userId,
-    origin: {
-      latitude: req.body.origin_latitude,
-      longitude: req.body.origin_longitude
-    },
-    time: req.body.time,
-    destination: {
-      latitude: req.body.destination_latitude,
-      longitude: req.body.destination_longitude
-    },
-    description: req.body.description || null,
-    interested: [req.userId]
-  })
+      userId: req.userId,
+      origin: {
+        latitude: req.body.origin_latitude,
+        longitude: req.body.origin_longitude
+      },
+      time: req.body.time,
+      destination: {
+        latitude: req.body.destination_latitude,
+        longitude: req.body.destination_longitude
+      },
+      description: req.body.description || null,
+      interested: [req.userId]
+    })
     .save()
     .then(result => {
       const io = IO.getIO();
@@ -95,9 +99,9 @@ exports.edit = (res, req, next) => {
     error.data = errors.array();
     throw error;
   }
-  Post.findOneAndUpdate(
-    { _id: req.body.postId },
-    {
+  Post.findOneAndUpdate({
+      _id: req.body.postId
+    }, {
       origin: {
         latitude: req.body.origin.latitude,
         longitude: req.body.origin.longitude
@@ -109,8 +113,7 @@ exports.edit = (res, req, next) => {
       },
       description: req.body.description || null,
       chatId: req.body.chatId || null
-    }
-  )
+    })
     .then(result => {
       const io = IO.getIO();
       io.emit("posts-updated");
@@ -129,9 +132,6 @@ exports.edit = (res, req, next) => {
 
 exports.interested = async (req, res, next) => {
   try {
-    console.log(req.params.id);
-    console.log("hi");
-
     const postDoc = await Post.findById(req.params.id);
     const interested = postDoc.interested;
     for (let index = 0; index < interested.length; index++) {
@@ -142,8 +142,13 @@ exports.interested = async (req, res, next) => {
     postDoc.interested = interested;
     postDoc.save();
     const io = IO.getIO();
-    io.emit("posts-updated", { message: "updated posts" });
-    res.status(201).json({ error: false, message: "added" });
+    io.emit("posts-updated", {
+      message: "updated posts"
+    });
+    res.status(201).json({
+      error: false,
+      message: "added"
+    });
   } catch (err) {
     if (!err.statusCode) err.statusCode = 500;
     next(err);
