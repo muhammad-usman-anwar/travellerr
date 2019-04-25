@@ -2,7 +2,9 @@ const User = require("../models/user");
 const IO = require("../socket");
 const EmailService = require("../emailService");
 
-const { validationResult } = require("express-validator/check");
+const {
+  validationResult
+} = require("express-validator/check");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -14,11 +16,16 @@ exports.signup = (req, response, next) => {
     error.data = errors.array();
     throw error;
   }
-  res.status(200).json({ error: false, message: "data recieved" });
+  response.status(200).json({
+    error: false,
+    message: "data recieved"
+  });
   IO.getIO().on("connection", socket => {
     const code = Math.round(Math.random() * 1000000);
     EmailService.sendVerificationMail(req.body.email, code);
     socket.on("verify", data => {
+      console.log('Code:' + code + '\tRecieved code' + data.code);
+
       if (!data.code) {
         socket.disconnect(true);
         const error = new Error("Socket Failed");
@@ -54,10 +61,16 @@ exports.signup = (req, response, next) => {
           return user.save();
         })
         .then(result => {
-          socket.emit("message", { error: false, message: "user created" });
+          socket.emit("message", {
+            error: false,
+            message: "user created"
+          });
         })
         .catch(err => {
-          socket.emit("message", { error: ture, message: err.message });
+          socket.emit("message", {
+            error: ture,
+            message: err.message
+          });
         });
     });
   });
@@ -75,8 +88,8 @@ exports.signin = (req, res, next) => {
   const password = req.body.password;
   let loadedUser;
   User.findOne({
-    email: email
-  })
+      email: email
+    })
     .then(user => {
       if (!user) {
         const error = new Error("User with this email could not be found");
@@ -92,12 +105,10 @@ exports.signin = (req, res, next) => {
         error.statusCode = 401;
         throw error;
       }
-      const token = jwt.sign(
-        {
+      const token = jwt.sign({
           userId: loadedUser._id
         },
-        "Allah is the greatest",
-        {
+        "Allah is the greatest", {
           expiresIn: "1h"
         }
       );
@@ -117,14 +128,18 @@ exports.signin = (req, res, next) => {
 };
 
 exports.details = (req, res, next) => {
-  User.findOne({ _id: req.userId })
+  User.findOne({
+      _id: req.userId
+    })
     .then(details => {
       if (!details) {
         const error = new Error("Error");
         error.statusCode = 401;
         throw error;
       } else {
-        res.status(200).json({ data: details });
+        res.status(200).json({
+          data: details
+        });
       }
     })
     .catch(err => {
