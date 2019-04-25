@@ -1,4 +1,6 @@
-const { validationResult } = require("express-validator/check");
+const {
+  validationResult
+} = require("express-validator/check");
 
 const Car = require("../models/car");
 
@@ -11,16 +13,16 @@ exports.add = (req, res, next) => {
     throw error;
   }
   new Car({
-    model: req.body.model,
-    manufacturer: req.body.manufacturer,
-    license: req.body.license,
-    userId: req.userId
-  })
+      model: req.body.model,
+      manufacturer: req.body.manufacturer,
+      license: req.body.license,
+      userId: req.userId
+    })
     .save()
     .then(result => {
       res.status(201).json({
         message: "Car Added",
-        error: "false"
+        error: false
       });
     })
     .catch(err => {
@@ -40,9 +42,9 @@ exports.remove = (req, res, next) => {
     throw error;
   }
   Car.findOneAndDelete({
-    license: req.body.license,
-    userId: req.userId
-  })
+      license: req.body.license,
+      userId: req.userId
+    })
     .then(result => {
       console.log(result);
       res.status(200).json({
@@ -64,15 +66,17 @@ exports.update = (req, res, next) => {
     manufacturer: req.body.manufacturer,
     license: req.body.license
   });
-  Car.updateOne(
-    {
-      license: req.body.license,
-      userId: req.userId
-    },
-    car
-  )
+  Car.updateOne({
+        license: req.body.license,
+        userId: req.userId
+      },
+      car
+    )
     .then(result => {
-      res.status(200).json({ error: false, message: "updated" });
+      res.status(200).json({
+        error: false,
+        message: "updated"
+      });
     })
     .catch(err => {
       if (!err.statusCode) {
@@ -84,15 +88,18 @@ exports.update = (req, res, next) => {
 
 exports.read = (req, res, next) => {
   Car.find({
-    userId: req.userId
-  })
+      userId: req.userId
+    })
     .then(carDoc => {
       if (!carDoc) {
         res.status(401).json({
           message: "No car registered"
         });
       }
-      res.status(200).json({ error: "flase", data: carDoc });
+      res.status(200).json({
+        error: "flase",
+        data: carDoc
+      });
     })
     .catch(err => {
       if (!err.statusCode) {
