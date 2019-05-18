@@ -1,5 +1,7 @@
 const express = require("express");
-const { body } = require("express-validator/check");
+const {
+  body
+} = require("express-validator/check");
 
 const User = require("../models/user");
 const Chat = require("../models/chat");
@@ -13,18 +15,22 @@ router.put(
   is_auth,
   [
     body("userId")
-      .trim()
-      .not()
-      .isEmpty()
-      .custom((value, { req }) => {
-        return User.findOne({ _id: value }).then(userDoc => {
-          if (!userDoc) Promise.reject("Invalid User Id");
-        });
-      }),
+    .trim()
+    .not()
+    .isEmpty()
+    .custom((value, {
+      req
+    }) => {
+      return User.findOne({
+        _id: value
+      }).then(userDoc => {
+        if (!userDoc) Promise.reject("Invalid User Id");
+      });
+    }),
     body("message")
-      .trim()
-      .not()
-      .isEmpty()
+    .trim()
+    .not()
+    .isEmpty()
   ],
   chatController.add
 );
@@ -33,7 +39,9 @@ router.put(
   "/insert",
   is_auth,
   [
-    body("chatId").custom((value, { req }) => {
+    body("chatId").custom((value, {
+      req
+    }) => {
       return Chat.findOne({
         _id: value
       }).then(chatDoc => {
@@ -43,9 +51,9 @@ router.put(
       });
     }),
     body("message")
-      .trim()
-      .not()
-      .isEmpty()
+    .trim()
+    .not()
+    .isEmpty()
   ],
   chatController.insert
 );

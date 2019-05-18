@@ -31,13 +31,16 @@ exports.signup = (req, response, next) => {
         const error = new Error("Socket Failed");
         error.statusCode = 422;
         error.data = errors.array();
-        throw error;
+        console.error(error);
       } else if (data.code != code) {
         socket.disconnect(true);
         const error = new Error("Invalid code");
         error.statusCode = 422;
         error.data = errors.array();
-        throw error;
+        socket.emit("message", {
+          error: true,
+          message: error
+        });
       }
       const firstName = req.body.firstName;
       const lastName = req.body.lastName;
