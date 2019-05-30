@@ -12,7 +12,7 @@ exports.create = async (req, res, next) => {
             const error = new Error("Validation Failed");
             error.statusCode = 422;
             error.data = errors.array();
-            throw error;
+            next(error);
         }
         const postDoc = await Post.findById(req.body.postId)
         if (!postDoc) throw new Error('Internal server error')
@@ -42,7 +42,7 @@ exports.create = async (req, res, next) => {
 
 exports.start = (req, res, next) => {};
 
-exports.finish = (req, rees, next) => {};
+exports.finish = (req, res, next) => {};
 
 exports.getTrip = async (req, res, next) => {
     try {

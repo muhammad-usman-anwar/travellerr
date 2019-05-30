@@ -1,4 +1,6 @@
-const { validationResult } = require("express-validator/check");
+const {
+  validationResult
+} = require("express-validator/check");
 
 const IO = require("../socket");
 
@@ -11,7 +13,7 @@ exports.list = async (req, res, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
   try {
     const chatList = [];
@@ -34,7 +36,9 @@ exports.list = async (req, res, next) => {
         }
       }
     }
-    res.status(200).json({ list: chatList });
+    res.status(200).json({
+      list: chatList
+    });
   } catch (error) {
     if (!error.statusCode) error.statusCode = 500;
     next(error);
@@ -48,14 +52,20 @@ exports.read = (req, res, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
-  Chat.findOne({ _id: req.params.id })
+  Chat.findOne({
+      _id: req.params.id
+    })
     .then(chatDoc => {
-      if (!chatDoc) res.status(401).json({ message: "Invalid chat id" });
+      if (!chatDoc) res.status(401).json({
+        message: "Invalid chat id"
+      });
       else {
         IO.setRoomEvent(chatDoc._id);
-        res.status(200).json({ chat: chatDoc });
+        res.status(200).json({
+          chat: chatDoc
+        });
       }
     })
     .catch(err => {
@@ -71,11 +81,15 @@ exports.insert = (req, res, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
-  Chat.findOne({ _id: req.body.chatId })
+  Chat.findOne({
+      _id: req.body.chatId
+    })
     .then(chatDoc => {
-      if (!chatDoc) res.status(401).json({ message: "Invalid chat id" });
+      if (!chatDoc) res.status(401).json({
+        message: "Invalid chat id"
+      });
       else {
         chatDoc.messages.push({
           userId: req.userId,
@@ -85,7 +99,9 @@ exports.insert = (req, res, next) => {
         io.to(req.body.chatId).emit("chat-notify", {
           data: "message recieved"
         });
-        res.status(200).json({ error: false });
+        res.status(200).json({
+          error: false
+        });
       }
     })
     .catch(err => {
@@ -100,27 +116,37 @@ exports.add = (req, res, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
 
-  Chat.findOne({ users: req.body.userId })
+  Chat.findOne({
+      users: req.body.userId
+    })
     .countDocuments()
     .then(num => {
       if (num) {
         const error = new Error("Chat Allready exists");
         error.statusCode = 400;
-        error.data = errors.array();
+        error.data = {
+          status: 1,
+          chat_id: num._id
+        }
         throw error;
       } else {
-        return new Chat({
-          users: [req.userId, req.body.userId],
-          messages: [
-            {
+        if (req.body.message) {
+          return new Chat({
+            users: [req.userId, req.body.userId],
+            messages: [{
               userId: req.userId,
               message: req.body.message
-            }
-          ]
-        }).save();
+            }]
+          }).save();
+        } else {
+          return new Chat({
+            users: [req.userId, req.body.userId],
+            messages: []
+          }).save();
+        }
       }
     })
     .then(result => {
@@ -133,6 +159,6 @@ exports.add = (req, res, next) => {
       console.log(err);
       const error = new Error("Internal error");
       error.statusCode = 401;
-      throw error;
+      next(error);
     });
 };

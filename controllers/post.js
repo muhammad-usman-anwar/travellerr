@@ -7,6 +7,13 @@ const User = require("../models/user");
 const IO = require("../socket");
 
 exports.read = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation Failed");
+    error.statusCode = 422;
+    error.data = errors.array();
+    next(error);
+  }
   try {
     let users = [];
     let user;
@@ -58,7 +65,7 @@ exports.add = (req, res, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
   new Post({
       userId: req.userId,
@@ -97,7 +104,7 @@ exports.edit = (res, req, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
   Post.findOneAndUpdate({
       _id: req.body.postId
@@ -119,7 +126,7 @@ exports.edit = (res, req, next) => {
       io.emit("posts-updated");
       res.status(200).json({
         message: "Post Updated",
-        error: "false"
+        error: false
       });
     })
     .catch(err => {

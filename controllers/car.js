@@ -10,7 +10,7 @@ exports.add = (req, res, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
   new Car({
       model: req.body.model,
@@ -29,7 +29,7 @@ exports.add = (req, res, next) => {
       console.log(err);
       const error = new Error("Internal error");
       error.statusCode = 401;
-      throw error;
+      next(error);
     });
 };
 
@@ -39,7 +39,7 @@ exports.remove = (req, res, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
   Car.findOneAndDelete({
       license: req.body.license,
