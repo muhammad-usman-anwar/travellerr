@@ -127,7 +127,10 @@ exports.add = (req, res, next) => {
       if (num) {
         const error = new Error("Chat Allready exists");
         error.statusCode = 400;
-        error.data = errors.array();
+        error.data = {
+          status: 1,
+          chat_id: num._id
+        }
         throw error;
       } else {
         if (req.body.message) {
