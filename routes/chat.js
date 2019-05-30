@@ -26,11 +26,7 @@ router.put(
       }).then(userDoc => {
         if (!userDoc) Promise.reject("Invalid User Id");
       });
-    }),
-    body("message")
-    .trim()
-    .not()
-    .isEmpty()
+    })
   ],
   chatController.add
 );

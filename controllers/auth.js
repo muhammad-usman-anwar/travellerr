@@ -14,7 +14,7 @@ exports.signup = (req, response, next) => {
     const error = new Error("Validation Failed");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    next(error);
   }
   response.status(200).json({
     error: false,
