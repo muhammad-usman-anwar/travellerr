@@ -122,16 +122,9 @@ exports.add = (req, res, next) => {
   Chat.findOne({
       users: req.body.userId
     })
-    .countDocuments()
-    .then(num => {
-      if (num) {
-        const error = new Error("Chat Allready exists");
-        error.statusCode = 400;
-        error.data = {
-          status: 1,
-          chat_id: num._id
-        }
-        throw error;
+    .then(chatDoc => {
+      if (chatDoc) {
+        return chatDoc;
       } else {
         if (req.body.message) {
           return new Chat({

@@ -20,7 +20,7 @@ exports.signup = (req, response, next) => {
     error: false,
     message: "data recieved"
   });
-  IO.getIO().on("connection", socket => {
+  IO.getIO().once("connection", socket => {
     const code = Math.round(Math.random() * 1000000);
     EmailService.sendVerificationMail(req.body.email, code);
     socket.on("verify", data => {
@@ -71,7 +71,7 @@ exports.signup = (req, response, next) => {
         })
         .catch(err => {
           socket.emit("message", {
-            error: ture,
+            error: true,
             message: err.message
           });
         });
