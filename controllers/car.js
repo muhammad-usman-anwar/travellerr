@@ -11,6 +11,7 @@ exports.add = (req, res, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   new Car({
       model: req.body.model,
@@ -40,6 +41,7 @@ exports.remove = (req, res, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   Car.findOneAndDelete({
       license: req.body.license,
@@ -60,6 +62,14 @@ exports.remove = (req, res, next) => {
 };
 
 exports.update = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new Error("Validation Failed");
+    error.statusCode = 422;
+    error.data = errors.array();
+    next(error);
+    return;
+  }
   const car = new Car({
     userId: req.userId,
     model: req.body.model,

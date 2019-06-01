@@ -14,6 +14,7 @@ exports.list = async (req, res, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   try {
     const chatList = [];
@@ -53,6 +54,7 @@ exports.read = (req, res, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   Chat.findOne({
       _id: req.params.id
@@ -82,6 +84,7 @@ exports.insert = (req, res, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   Chat.findOne({
       _id: req.body.chatId
@@ -117,6 +120,7 @@ exports.add = (req, res, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
 
   Chat.findOne({
