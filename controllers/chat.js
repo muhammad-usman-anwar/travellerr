@@ -145,7 +145,7 @@ exports.add = (req, res, next) => {
     .then(result => {
       res.status(201).json({
         message: "New chat created",
-        chat_id: result._id
+        chatId: result._id
       });
     })
     .catch(err => {
