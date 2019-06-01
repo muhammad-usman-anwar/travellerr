@@ -15,6 +15,7 @@ exports.signup = (req, response, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   response.status(200).json({
     error: false,

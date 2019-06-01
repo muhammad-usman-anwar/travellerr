@@ -13,6 +13,7 @@ exports.create = async (req, res, next) => {
             error.statusCode = 422;
             error.data = errors.array();
             next(error);
+            return;
         }
         const postDoc = await Post.findById(req.body.postId)
         if (!postDoc) throw new Error('Internal server error')

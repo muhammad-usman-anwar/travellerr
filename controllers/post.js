@@ -13,6 +13,7 @@ exports.read = async (req, res, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   try {
     let users = [];
@@ -66,6 +67,7 @@ exports.add = (req, res, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   new Post({
       userId: req.userId,
@@ -105,6 +107,7 @@ exports.edit = (res, req, next) => {
     error.statusCode = 422;
     error.data = errors.array();
     next(error);
+    return;
   }
   Post.findOneAndUpdate({
       _id: req.body.postId
