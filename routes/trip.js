@@ -5,13 +5,15 @@ const {
 
 const Car = require("../models/car");
 const Post = require('../models/post')
-const Chat = require('../models/chat')
 const TripController = require("../controllers/trip");
 const is_auth = require("../middleware/is_auth");
+const {
+    is_allowed
+} = require('../middleware/trip');
 
 const router = express.Router();
 
-router.put("/add", is_auth, [
+router.put("/add", is_auth, is_allowed, [
     body('postId').custom((value, {
         req
     }) => {
@@ -29,13 +31,7 @@ router.put("/add", is_auth, [
             if (!carDoc) Promise.reject('Invalid car Id')
         })
     }),
-    body('chatId').custom((value, {
-        req
-    }) => {
-        return Chat.findById(value).then(chatDoc => {
-            if (!chatDoc) Promise.reject('Invalid chatId')
-        })
-    })
+    body('poolers').not().isEmpty().isArray()
 ], TripController.create);
 
 router.post("/start", is_auth, TripController.start);
