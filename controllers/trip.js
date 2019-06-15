@@ -1,27 +1,18 @@
-const {
-    validationResult
-} = require("express-validator/check");
-
+//Models
 const Trip = require("../models/trip");
 const Post = require('../models/post')
 
 exports.create = async (req, res, next) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            const error = new Error("Validation Failed");
-            error.statusCode = 422;
-            error.data = errors.array();
-            next(error);
-            return;
-        }
         const postDoc = await Post.findById(req.body.postId)
         if (!postDoc) throw new Error('Internal server error')
+        const users = [req.userId];
+        users.concat(req.body.poolers)
         new Trip({
-                users: [req.userId],
+                initiator: req.userId,
+                users: users,
                 carId: req.body.carId,
-                postId: postDoc._id,
-                chatId: req.body.chatId
+                postId: postDoc._id
             })
             .save()
             .then(result => {

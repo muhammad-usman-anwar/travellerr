@@ -3,10 +3,18 @@ const {
   body
 } = require("express-validator/check");
 
+//Models
 const User = require("../models/user");
 const Chat = require("../models/chat");
+
+//Controllers
 const chatController = require("../controllers/chat");
+
+//Middlewares
 const is_auth = require("../middleware/is_auth");
+const {
+  validationErrors
+} = require('../middleware/error')
 
 const router = express.Router();
 
@@ -28,6 +36,7 @@ router.put(
       });
     })
   ],
+  validationErrors,
   chatController.add
 );
 
@@ -51,6 +60,7 @@ router.put(
     .not()
     .isEmpty()
   ],
+  validationErrors,
   chatController.insert
 );
 

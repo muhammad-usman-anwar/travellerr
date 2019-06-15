@@ -3,17 +3,25 @@ const {
     body
 } = require("express-validator/check");
 
+//Models
 const Car = require("../models/car");
 const Post = require('../models/post')
+
+//Controllers
 const TripController = require("../controllers/trip");
+
+// Middlewares
 const is_auth = require("../middleware/is_auth");
 const {
-    is_allowed
+    is_allowed_to_create
 } = require('../middleware/trip');
+const {
+    validationErrors
+} = require('../middleware/error')
 
 const router = express.Router();
 
-router.put("/add", is_auth, is_allowed, [
+router.put("/add", is_auth, [
     body('postId').custom((value, {
         req
     }) => {
@@ -32,7 +40,7 @@ router.put("/add", is_auth, is_allowed, [
         })
     }),
     body('poolers').not().isEmpty().isArray()
-], TripController.create);
+], validationErrors, is_allowed_to_create, TripController.create);
 
 router.post("/start", is_auth, TripController.start);
 

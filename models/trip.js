@@ -11,6 +11,11 @@ const tripSchema = new Schema({
     ref: "Post",
     required: true
   },
+  initiator: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
   users: [{
     type: Schema.Types.ObjectId,
     ref: "User",
@@ -19,11 +24,6 @@ const tripSchema = new Schema({
   carId: {
     type: Schema.Types.ObjectId,
     ref: "Car",
-    required: true
-  },
-  chatId: {
-    type: Schema.Types.ObjectId,
-    ref: "Chat",
     required: true
   }
 });

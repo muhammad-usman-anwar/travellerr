@@ -1,6 +1,7 @@
 const Car = require('../models/car')
+const Trip = require('../models/trip')
 
-exports.is_allowed = (req, res, next) => {
+exports.is_allowed_to_create = (req, res, next) => {
     Car.find({
             userId: req.userId
         })
@@ -17,4 +18,12 @@ exports.is_allowed = (req, res, next) => {
             if (!err.statusCode) err.statusCode = 400;
             next(err)
         })
+}
+
+exports.is_allowed_to_manupulate = (req, res, next) => {
+
+}
+
+exports.is_initiator = (req, res, next) => {
+
 }
