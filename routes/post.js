@@ -1,6 +1,7 @@
 const express = require("express");
 const {
-  body
+  body,
+  param
 } = require("express-validator/check");
 
 //Models
@@ -66,6 +67,6 @@ router.put(
   postController.add
 );
 
-router.get("/:id/interested", is_auth, postController.interested);
+router.get("/:id/interested", is_auth, [param('id').not().isEmpty()], validationErrors, postController.interested);
 
 module.exports = router;

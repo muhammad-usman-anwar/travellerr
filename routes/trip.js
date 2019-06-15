@@ -1,11 +1,14 @@
 const express = require("express");
 const {
-    body
+    body,
+    param
 } = require("express-validator/check");
 
 //Models
 const Car = require("../models/car");
 const Post = require('../models/post')
+const Trip = require('../models/trip')
+const User = require('../models/user')
 
 //Controllers
 const TripController = require("../controllers/trip");
@@ -13,7 +16,9 @@ const TripController = require("../controllers/trip");
 // Middlewares
 const is_auth = require("../middleware/is_auth");
 const {
-    is_allowed_to_create
+    is_allowed_to_create,
+    is_initiator,
+    is_allowed_to_manupulate
 } = require('../middleware/trip');
 const {
     validationErrors
@@ -69,10 +74,92 @@ router.post("/add/get/interested",
 );
 
 
-router.post("/start", is_auth, TripController.start);
+router.post("/:id/start",
+    is_auth,
+    [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        }),
+        body('latitude').not().isEmpty(),
+        body('longitude').not().isEmpty()
+    ],
+    validationErrors, is_initiator,
+    TripController.start);
 
-router.post("/finish", is_auth, TripController.finish);
+router.post("/:id/finish",
+    is_auth,
+    [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        }),
+        body('latitude').not().isEmpty(),
+        body('longitude').not().isEmpty()
+    ],
+    validationErrors,
+    is_initiator,
+    TripController.finish);
 
-router.get('/:id', is_auth, TripController.getTrip)
+router.get('/:id', is_auth, [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        })
+    ],
+    validationErrors,
+    TripController.getTrip)
+
+router.get('/:id/accept', is_auth,
+    [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        })
+    ],
+    validationErrors,
+    TripController.getTrip)
+
+router.get('/:id/reject', is_auth,
+    [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        }),
+    ],
+    validationErrors,
+    TripController.getTrip)
+
+router.get('/:id/cancel', is_auth,
+    [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        }),
+    ],
+    validationErrors, TripController.getTrip)
+
+router.get('/:id/rate/:user', is_auth,
+    [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        }),
+        param('user').custom((value, req) => {
+            return User.findById(value).then(userDoc => {
+                if (!userDoc) Promise.reject('Invalid user Id')
+            })
+        }),
+    ],
+    validationErrors,
+    TripController.getTrip
+)
 
 module.exports = router;

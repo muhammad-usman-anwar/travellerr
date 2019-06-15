@@ -14,19 +14,21 @@ exports.create = async (req, res, next) => {
                 initiator: req.userId,
                 users: users,
                 carId: req.body.carId,
-                postId: postDoc._id
+                postId: postDoc._id,
+                state: 'INITIATED'
             })
             .save()
             .then(result => {
                 res.status(201).json({
                     error: false,
                     message: 'trip created'
-                }).catch(err => {
-                    console.log(err);
-                    const error = new Error('Internal server error')
-                    error.statusCode = 401
-                    throw error
                 })
+            })
+            .catch(err => {
+                console.log(err);
+                const error = new Error('Internal server error')
+                error.statusCode = 401
+                throw error
             })
     } catch (error) {
         if (!error.statusCode) error.statusCode = 500
@@ -34,9 +36,56 @@ exports.create = async (req, res, next) => {
     }
 };
 
-exports.start = (req, res, next) => {};
+exports.start = (req, res, next) => {
+    try {
+        Trip.findByIdAndUpdate(req.params.id, {
+                origin: {
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude
+                },
+                startTime: (new Date).toISOString(),
+                state: 'ONGOING'
+            })
+            .then(result => {
+                res.status(200).json({
+                    error: false,
+                    message: 'trip started'
+                })
+            })
+            .catch(err => {
+                throw err
+            })
 
-exports.finish = (req, res, next) => {};
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+};
+
+exports.finish = (req, res, next) => {
+    try {
+        Trip.findByIdAndUpdate(req.params.id, {
+                destination: {
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude
+                },
+                arrivalTime: (new Date).toISOString(),
+                state: 'COMPLETED'
+            })
+            .then(result => {
+                res.status(200).json({
+                    error: false,
+                    message: 'trip completed'
+                })
+            })
+            .catch(err => {
+                throw err
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+};
 
 exports.getTrip = async (req, res, next) => {
     try {
@@ -76,10 +125,10 @@ exports.getCars = (req, res, next) => {
     }
 }
 
-exports.getInterested = async (req, res, next) => {
+exports.getInterested = (req, res, next) => {
     try {
         Post.findById(req.body.postId)
-            .then(document => {
+            .then(async document => {
                 if (!document) {
                     const error = new Error("Invalid Post Id");
                     error.statusCode = 401;
