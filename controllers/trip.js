@@ -1,6 +1,8 @@
 //Models
-const Trip = require("../models/trip");
+const User = require('../models/user')
+const Trip = require('../models/trip')
 const Post = require('../models/post')
+const Car = require('../models/car')
 
 exports.create = async (req, res, next) => {
     try {
@@ -44,6 +46,85 @@ exports.getTrip = async (req, res, next) => {
             error: false,
             trip: trip
         })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
+
+exports.getCars = (req, res, next) => {
+    try {
+        Car.find({
+                userId: req.userId
+            })
+            .then(documents => {
+                if (!documents) {
+                    const error = new Error("Error");
+                    error.statusCode = 401;
+                    throw error;
+                }
+                res.status(200).json({
+                    data: documents
+                });
+            })
+            .catch(err => {
+                throw err
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
+
+exports.getInterested = async (req, res, next) => {
+    try {
+        Post.findById(req.body.postId)
+            .then(document => {
+                if (!document) {
+                    const error = new Error("Invalid Post Id");
+                    error.statusCode = 401;
+                    throw error;
+                }
+                const interested = document.interested
+                const interestedList = []
+                for (let i = 0; i < interested.length; i++) {
+                    const user = await User.findById(interested[i])
+                    interestedList.push({
+                        id: user._id,
+                        name: `${user.firstName} ${user.lastName}`
+                    })
+                }
+                res.status(200).json({
+                    data: interestedList
+                });
+            })
+            .catch(err => {
+                throw err
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
+
+exports.getPosts = (req, res, next) => {
+    try {
+        Post.find({
+                interested: req.userId
+            })
+            .then(documents => {
+                if (!documents) {
+                    const error = new Error("Error");
+                    error.statusCode = 401;
+                    throw error;
+                }
+                res.status(200).json({
+                    data: documents
+                });
+            })
+            .catch(err => {
+                throw err
+            })
     } catch (error) {
         if (!error.statusCode) error.statusCode = 500
         next(error)
