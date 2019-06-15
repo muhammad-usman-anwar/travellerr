@@ -111,7 +111,8 @@ router.get('/:id', is_auth, [
         })
     ],
     validationErrors,
-    TripController.getTrip)
+    TripController.getTrip
+)
 
 router.get('/:id/accept', is_auth,
     [
@@ -122,7 +123,9 @@ router.get('/:id/accept', is_auth,
         })
     ],
     validationErrors,
-    TripController.getTrip)
+    is_allowed_to_manupulate,
+    TripController.accept
+)
 
 router.get('/:id/reject', is_auth,
     [
@@ -133,7 +136,9 @@ router.get('/:id/reject', is_auth,
         }),
     ],
     validationErrors,
-    TripController.getTrip)
+    is_allowed_to_manupulate,
+    TripController.reject
+)
 
 router.get('/:id/cancel', is_auth,
     [
@@ -143,7 +148,10 @@ router.get('/:id/cancel', is_auth,
             })
         }),
     ],
-    validationErrors, TripController.getTrip)
+    validationErrors,
+    is_allowed_to_manupulate,
+    TripController.cancel
+)
 
 router.get('/:id/rate/:user', is_auth,
     [
@@ -159,7 +167,20 @@ router.get('/:id/rate/:user', is_auth,
         }),
     ],
     validationErrors,
-    TripController.getTrip
+    is_allowed_to_manupulate,
+    TripController.rate
+)
+
+router.get('/:id/update', is_auth, [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        })
+    ],
+    validationErrors,
+    is_initiator,
+    TripController.updateOngoingTrip
 )
 
 module.exports = router;

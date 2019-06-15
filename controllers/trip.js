@@ -179,3 +179,13 @@ exports.getPosts = (req, res, next) => {
         next(error)
     }
 }
+
+exports.accept = (req, res, next) => {}
+
+exports.reject = (req, res, next) => {}
+
+exports.cancel = (req, res, next) => {}
+
+exports.rate = (req, res, next) => {}
+
+exports.updateOngoingTrip = (req, res, next) => {}
