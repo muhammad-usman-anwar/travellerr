@@ -1,21 +1,10 @@
-const {
-  validationResult
-} = require("express-validator/check");
-
 const IO = require("../socket");
 
+//Models
 const Chat = require("../models/chat");
 const User = require("../models/user");
 
 exports.list = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
   try {
     const chatList = [];
     const chatDocs = await Chat.find({
@@ -48,14 +37,6 @@ exports.list = async (req, res, next) => {
 
 exports.read = (req, res, next) => {
   const io = IO.getIO();
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
   Chat.findOne({
       _id: req.params.id
     })
@@ -78,14 +59,6 @@ exports.read = (req, res, next) => {
 
 exports.insert = (req, res, next) => {
   const io = IO.getIO();
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
   Chat.findOne({
       _id: req.body.chatId
     })
@@ -114,14 +87,6 @@ exports.insert = (req, res, next) => {
 };
 
 exports.add = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
 
   Chat.findOne({
       users: req.body.userId
@@ -153,7 +118,6 @@ exports.add = (req, res, next) => {
       });
     })
     .catch(err => {
-      console.log(err);
       const error = new Error("Internal error");
       error.statusCode = 401;
       next(error);

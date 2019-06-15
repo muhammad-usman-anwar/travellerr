@@ -1,9 +1,20 @@
 const express = require("express");
-const { body } = require("express-validator/check");
+const {
+  body,
+  param
+} = require("express-validator/check");
 
+//Models
 const Post = require("../models/chat");
+
+//Controllers
 const postController = require("../controllers/post");
+
+//Middlewares
 const is_auth = require("../middleware/is_auth");
+const {
+  validationErrors
+} = require('../middleware/error')
 
 const router = express.Router();
 
@@ -13,7 +24,9 @@ router.patch(
   "/",
   is_auth,
   [
-    body("postId").custom((value, { req }) => {
+    body("postId").custom((value, {
+      req
+    }) => {
       return Post.findOne({
         _id: value
       }).then(postDoc => {
@@ -23,6 +36,7 @@ router.patch(
       });
     })
   ],
+  validationErrors,
   postController.edit
 );
 
@@ -31,27 +45,28 @@ router.put(
   is_auth,
   [
     body("origin_latitude")
-      .trim()
-      .not()
-      .isEmpty(),
+    .trim()
+    .not()
+    .isEmpty(),
     body("origin_longitude")
-      .trim()
-      .not()
-      .isEmpty(),
+    .trim()
+    .not()
+    .isEmpty(),
     body("time")
-      .trim()
-      .not()
-      .isEmpty(),
+    .trim()
+    .not()
+    .isEmpty(),
     body("destination_latitude")
-      .not()
-      .isEmpty(),
+    .not()
+    .isEmpty(),
     body("destination_longitude")
-      .not()
-      .isEmpty()
+    .not()
+    .isEmpty()
   ],
+  validationErrors,
   postController.add
 );
 
-router.get("/:id/interested", is_auth, postController.interested);
+router.get("/:id/interested", is_auth, [param('id').not().isEmpty()], validationErrors, postController.interested);
 
 module.exports = router;

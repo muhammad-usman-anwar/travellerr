@@ -1,18 +1,7 @@
-const {
-  validationResult
-} = require("express-validator/check");
-
+//Models
 const Car = require("../models/car");
 
 exports.add = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
   new Car({
       model: req.body.model,
       manufacturer: req.body.manufacturer,
@@ -35,14 +24,6 @@ exports.add = (req, res, next) => {
 };
 
 exports.remove = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
   Car.findOneAndDelete({
       license: req.body.license,
       userId: req.userId
@@ -62,14 +43,6 @@ exports.remove = (req, res, next) => {
 };
 
 exports.update = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
   const car = new Car({
     userId: req.userId,
     model: req.body.model,

@@ -1,39 +1,34 @@
-const {
-    validationResult
-} = require("express-validator/check");
-
-const Trip = require("../models/trip");
+//Models
+const User = require('../models/user')
+const Trip = require('../models/trip')
 const Post = require('../models/post')
+const Car = require('../models/car')
 
 exports.create = async (req, res, next) => {
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            const error = new Error("Validation Failed");
-            error.statusCode = 422;
-            error.data = errors.array();
-            next(error);
-            return;
-        }
         const postDoc = await Post.findById(req.body.postId)
         if (!postDoc) throw new Error('Internal server error')
+        const users = [req.userId];
+        users.concat(req.body.poolers)
         new Trip({
-                users: [req.userId],
+                initiator: req.userId,
+                users: users,
                 carId: req.body.carId,
                 postId: postDoc._id,
-                chatId: req.body.chatId
+                state: 'INITIATED'
             })
             .save()
             .then(result => {
                 res.status(201).json({
                     error: false,
                     message: 'trip created'
-                }).catch(err => {
-                    console.log(err);
-                    const error = new Error('Internal server error')
-                    error.statusCode = 401
-                    throw error
                 })
+            })
+            .catch(err => {
+                console.log(err);
+                const error = new Error('Internal server error')
+                error.statusCode = 401
+                throw error
             })
     } catch (error) {
         if (!error.statusCode) error.statusCode = 500
@@ -41,9 +36,56 @@ exports.create = async (req, res, next) => {
     }
 };
 
-exports.start = (req, res, next) => {};
+exports.start = (req, res, next) => {
+    try {
+        Trip.findByIdAndUpdate(req.params.id, {
+                origin: {
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude
+                },
+                startTime: (new Date).toISOString(),
+                state: 'ONGOING'
+            })
+            .then(result => {
+                res.status(200).json({
+                    error: false,
+                    message: 'trip started'
+                })
+            })
+            .catch(err => {
+                throw err
+            })
 
-exports.finish = (req, res, next) => {};
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+};
+
+exports.finish = (req, res, next) => {
+    try {
+        Trip.findByIdAndUpdate(req.params.id, {
+                destination: {
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude
+                },
+                arrivalTime: (new Date).toISOString(),
+                state: 'COMPLETED'
+            })
+            .then(result => {
+                res.status(200).json({
+                    error: false,
+                    message: 'trip completed'
+                })
+            })
+            .catch(err => {
+                throw err
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+};
 
 exports.getTrip = async (req, res, next) => {
     try {
@@ -58,3 +100,92 @@ exports.getTrip = async (req, res, next) => {
         next(error)
     }
 }
+
+exports.getCars = (req, res, next) => {
+    try {
+        Car.find({
+                userId: req.userId
+            })
+            .then(documents => {
+                if (!documents) {
+                    const error = new Error("Error");
+                    error.statusCode = 401;
+                    throw error;
+                }
+                res.status(200).json({
+                    data: documents
+                });
+            })
+            .catch(err => {
+                throw err
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
+
+exports.getInterested = (req, res, next) => {
+    try {
+        Post.findById(req.body.postId)
+            .then(async document => {
+                if (!document) {
+                    const error = new Error("Invalid Post Id");
+                    error.statusCode = 401;
+                    throw error;
+                }
+                const interested = document.interested
+                const interestedList = []
+                for (let i = 0; i < interested.length; i++) {
+                    const user = await User.findById(interested[i])
+                    interestedList.push({
+                        id: user._id,
+                        name: `${user.firstName} ${user.lastName}`
+                    })
+                }
+                res.status(200).json({
+                    data: interestedList
+                });
+            })
+            .catch(err => {
+                throw err
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
+
+exports.getPosts = (req, res, next) => {
+    try {
+        Post.find({
+                interested: req.userId
+            })
+            .then(documents => {
+                if (!documents) {
+                    const error = new Error("Error");
+                    error.statusCode = 401;
+                    throw error;
+                }
+                res.status(200).json({
+                    data: documents
+                });
+            })
+            .catch(err => {
+                throw err
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
+
+exports.accept = (req, res, next) => {}
+
+exports.reject = (req, res, next) => {}
+
+exports.cancel = (req, res, next) => {}
+
+exports.rate = (req, res, next) => {}
+
+exports.updateOngoingTrip = (req, res, next) => {}

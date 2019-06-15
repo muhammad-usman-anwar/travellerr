@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const tripSchema = new Schema({
+  startTime: {
+    type: String,
+    required: false
+  },
   arrivalTime: {
     type: String,
     required: false
@@ -9,6 +13,11 @@ const tripSchema = new Schema({
   postId: {
     type: Schema.Types.ObjectId,
     ref: "Post",
+    required: true
+  },
+  initiator: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
     required: true
   },
   users: [{
@@ -21,11 +30,34 @@ const tripSchema = new Schema({
     ref: "Car",
     required: true
   },
-  chatId: {
-    type: Schema.Types.ObjectId,
-    ref: "Chat",
+  state: {
+    type: String,
     required: true
-  }
+  },
+  origin: {
+    latitude: {
+      type: String,
+      required: false
+    },
+    longitude: {
+      type: String,
+      required: false
+    }
+  },
+  time: {
+    type: String,
+    required: false
+  },
+  destination: {
+    latitude: {
+      type: String,
+      required: false
+    },
+    longitude: {
+      type: String,
+      required: false
+    }
+  },
 });
 
 module.exports = mongoose.model("Trip", tripSchema);

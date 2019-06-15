@@ -1,20 +1,11 @@
-const {
-  validationResult
-} = require("express-validator/check");
-
+//Models
 const Post = require("../models/post");
 const User = require("../models/user");
+
 const IO = require("../socket");
 
 exports.read = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
+
   try {
     let users = [];
     let user;
@@ -59,16 +50,6 @@ exports.read = async (req, res, next) => {
 };
 
 exports.add = (req, res, next) => {
-  console.log("Testing:\t" + req.body);
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
   new Post({
       userId: req.userId,
       origin: {
@@ -101,14 +82,6 @@ exports.add = (req, res, next) => {
 };
 
 exports.edit = (res, req, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new Error("Validation Failed");
-    error.statusCode = 422;
-    error.data = errors.array();
-    next(error);
-    return;
-  }
   Post.findOneAndUpdate({
       _id: req.body.postId
     }, {

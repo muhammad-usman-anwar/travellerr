@@ -1,7 +1,7 @@
 {
   "name": "travellerr",
-  "version": "0.24.1012",
-  "description": "",
+  "version": "0.27.116",
+  "description": "Rest API for traveller",
   "main": "app.js",
   "scripts": {
     "start": "nodemon ./app.js",
