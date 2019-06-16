@@ -7,7 +7,7 @@ module.exports = {
   init: httpServer => {
     io = require("socket.io")(httpServer);
     io.on("connection", socket => {
-      ioEvents.on("addToRoom", room => {
+      ioEvents.once("addToRoom", room => {
         socket.join(room);
       });
     });

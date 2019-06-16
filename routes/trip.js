@@ -18,6 +18,7 @@ const is_auth = require("../middleware/is_auth");
 const {
     is_allowed_to_create,
     is_initiator,
+    is_allowed_to_start,
     is_allowed_to_manupulate,
     is_rating_allowed
 } = require('../middleware/trip');
@@ -86,7 +87,9 @@ router.post("/:id/start",
         body('latitude').not().isEmpty(),
         body('longitude').not().isEmpty()
     ],
-    validationErrors, is_initiator,
+    validationErrors,
+    is_initiator,
+    is_allowed_to_start,
     TripController.start);
 
 router.post("/:id/finish",

@@ -36,7 +36,6 @@ exports.list = async (req, res, next) => {
 };
 
 exports.read = (req, res, next) => {
-  const io = IO.getIO();
   Chat.findOne({
       _id: req.params.id
     })
