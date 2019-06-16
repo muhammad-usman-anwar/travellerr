@@ -21,7 +21,7 @@ const userSchema = new Schema({
     },
     cnic: {
         type: Number,
-        unique:true,
+        unique: true,
         required: true
     },
     dateOfBirth: {
@@ -30,12 +30,21 @@ const userSchema = new Schema({
     },
     gender: {
         type: String,
-        required: true
+        required: true,
     },
-    rating: {
-        type: Number,
-        default: 0
-    }
+    rating: [{
+        value: {
+            type: Number,
+            required: true,
+            min: 1,
+            max: 5
+        },
+        tripId: {
+            type: Schema.Types.ObjectId,
+            ref: "Trip",
+            required: true
+        }
+    }]
 })
 
 module.exports = mongoose.model('User', userSchema)

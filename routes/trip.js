@@ -18,7 +18,8 @@ const is_auth = require("../middleware/is_auth");
 const {
     is_allowed_to_create,
     is_initiator,
-    is_allowed_to_manupulate
+    is_allowed_to_manupulate,
+    is_rating_allowed
 } = require('../middleware/trip');
 const {
     validationErrors
@@ -153,7 +154,7 @@ router.get('/:id/cancel', is_auth,
     TripController.cancel
 )
 
-router.get('/:id/rate/:user', is_auth,
+router.post('/:id/rate/:user', is_auth,
     [
         param('id').custom((value, req) => {
             return Trip.findById(value).then(trip => {
@@ -165,10 +166,26 @@ router.get('/:id/rate/:user', is_auth,
                 if (!userDoc) Promise.reject('Invalid user Id')
             })
         }),
+        body('rating').not().isEmpty()
     ],
     validationErrors,
     is_allowed_to_manupulate,
+    is_rating_allowed,
     TripController.rate
+)
+
+router.post('/:id/update', is_auth, [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        }),
+        body('latitude').not().isEmpty(),
+        body('longitude').not().isEmpty(),
+    ],
+    validationErrors,
+    is_initiator,
+    TripController.updateOngoingTrip
 )
 
 router.get('/:id/update', is_auth, [
@@ -179,8 +196,8 @@ router.get('/:id/update', is_auth, [
         })
     ],
     validationErrors,
-    is_initiator,
-    TripController.updateOngoingTrip
+    is_allowed_to_manupulate,
+    TripController.getUpdateOngoingTrip
 )
 
 module.exports = router;

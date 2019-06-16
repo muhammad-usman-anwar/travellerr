@@ -4,6 +4,8 @@ const Trip = require('../models/trip')
 const Post = require('../models/post')
 const Car = require('../models/car')
 
+const TripState = require('../tripState')
+
 exports.create = async (req, res, next) => {
     try {
         const postDoc = await Post.findById(req.body.postId)
@@ -47,6 +49,11 @@ exports.start = (req, res, next) => {
                 state: 'ONGOING'
             })
             .then(result => {
+                TripState.add({
+                    id: req.params.id,
+                    latitude: req.body.latitude,
+                    longitude: req.body.longitude
+                })
                 res.status(200).json({
                     error: false,
                     message: 'trip started'
@@ -182,10 +189,111 @@ exports.getPosts = (req, res, next) => {
 
 exports.accept = (req, res, next) => {}
 
-exports.reject = (req, res, next) => {}
+exports.reject = (req, res, next) => {
+    try {
+        Trip.findById(req.params.id)
+            .then(tripDoc => {
+                tripDoc.users.forEach((value, index, array) => {
+                    if (value === req.userId) {
+                        tripDoc.users.splice(index, 1);
+                        tripDoc.save()
+                            .then(result => {
+                                if (!result) throw new Error('Internal server Error!')
+                                res.status(200).json({
+                                    error: false,
+                                    message: 'Offer Rejected'
+                                })
+                            })
+                            .catch(err => {
+                                throw err
+                            })
+                        return;
+                    }
+                })
+            })
+            .catch(err => {
+                throw err
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
 
-exports.cancel = (req, res, next) => {}
+exports.cancel = (req, res, next) => {
+    try {
+        Trip.findByIdAndDelete(req.params.id)
+            .then(result => {
+                if (!result) {
+                    throw new Error("Internal Server Error")
+                }
+                res.status(200).json({
+                    error: false,
+                    message: 'Trip canceled'
+                })
+            })
+            .catch(err => {
+                throw err
+            })
 
-exports.rate = (req, res, next) => {}
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
 
-exports.updateOngoingTrip = (req, res, next) => {}
+exports.rate = (req, res, next) => {
+    try {
+        User.findById(req.params.user)
+            .then(userDoc => {
+                userDoc.rating.push({
+                    value: req.body.rating,
+                    tripId: req.params.id
+                })
+                userDoc.save()
+                    .catch(err => {
+                        throw err;
+                    })
+            })
+            .catch(err => {
+                throw err;
+            })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
+
+exports.updateOngoingTrip = (req, res, next) => {
+    try {
+        TripState.setData({
+            id: req.params.id,
+            latitude: req.body.latitude,
+            longitude: req.body.longitude
+        })
+        res.status(200).json({
+            error: false,
+            message: 'UPDATED'
+        })
+
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
+
+exports.getUpdateOngoingTrip = (req, res, next) => {
+    try {
+        const data = TripState.getData(req.params.id)
+        res.status(200).json({
+            error: false,
+            data: {
+                latitude: data.latitude,
+                longitude: data.longitude
+            }
+        })
+    } catch (error) {
+        if (!error.statusCode) error.statusCode = 500
+        next(error)
+    }
+}
