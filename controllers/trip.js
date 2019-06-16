@@ -1,3 +1,5 @@
+const IO = require("../socket");
+
 //Models
 const User = require('../models/user')
 const Trip = require('../models/trip')
@@ -54,6 +56,7 @@ exports.start = (req, res, next) => {
                     latitude: req.body.latitude,
                     longitude: req.body.longitude
                 })
+                IO.setRoomEvent(req.params.id)
                 res.status(200).json({
                     error: false,
                     message: 'trip started'
@@ -98,6 +101,7 @@ exports.getTrip = async (req, res, next) => {
     try {
         const trip = await Trip.findById(req.params.id)
         if (!trip) throw new Error('Invalid Trip ID')
+        IO.setRoomEvent(req.params.id)
         res.status(200).json({
             error: false,
             trip: trip
@@ -266,10 +270,14 @@ exports.rate = (req, res, next) => {
 
 exports.updateOngoingTrip = (req, res, next) => {
     try {
+        const io = IO.getIO()
         TripState.setData({
             id: req.params.id,
             latitude: req.body.latitude,
             longitude: req.body.longitude
+        })
+        io.to(req.params.id).emit('trip-notify', {
+            message: 'Cordinates updated'
         })
         res.status(200).json({
             error: false,

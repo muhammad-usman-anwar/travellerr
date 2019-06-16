@@ -79,3 +79,18 @@ exports.is_rating_allowed = (req, res, next) => {
             next(err)
         })
 }
+
+exports.is_allowed_to_start = (req, res, next) => {
+    Trip.find({
+            state: 'ONGOING'
+        })
+        .countDocuments()
+        .then(num => {
+            if (num > 0) throw new Error('You already have an ongoing trip');
+            next();
+        })
+        .catch(err => {
+            if (!err.statusCode) err.statusCode = 400;
+            next(err)
+        })
+}
