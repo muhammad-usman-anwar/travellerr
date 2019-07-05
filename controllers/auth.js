@@ -39,6 +39,7 @@ exports.signup = (req, response, next) => {
       const cnic = req.body.cnic;
       const dateOfBirth = req.body.dateOfBirth;
       const gender = req.body.gender;
+      const phone = req.body.phoneNo;
       bcrypt
         .hash(password, 15)
         .then(hashedPassword => {
@@ -49,7 +50,8 @@ exports.signup = (req, response, next) => {
             password: hashedPassword,
             cnic: cnic,
             dateOfBirth: dateOfBirth,
-            gender: gender
+            gender: gender,
+            phoneNo: phone
           });
           return user.save();
         })

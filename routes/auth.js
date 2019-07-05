@@ -51,6 +51,9 @@ router.put(
     body("cnic")
     .not()
     .isEmpty(),
+    body("phoneNo")
+    .not()
+    .isEmpty(),
     body("dateOfBirth")
     .trim()
     .not()
