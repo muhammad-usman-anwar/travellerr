@@ -206,7 +206,11 @@ exports.getPosts = (req, res, next) => {
     }
 }
 
-exports.accept = (req, res, next) => {}
+exports.accept = (req, res, next) => {
+    res.status(200).json({
+        message: "Accepted"
+    })
+}
 
 exports.reject = (req, res, next) => {
     try {
@@ -269,7 +273,14 @@ exports.rate = (req, res, next) => {
                     value: req.body.rating,
                     tripId: req.params.id
                 })
-                userDoc.save()
+                userDoc
+                    .save()
+                    .then(result => {
+                        res.status(200).json({
+                            error: false,
+                            message: "Ratings updated"
+                        })
+                    })
                     .catch(err => {
                         throw err;
                     })
