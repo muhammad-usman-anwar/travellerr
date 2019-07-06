@@ -123,8 +123,15 @@ exports.getCars = (req, res, next) => {
                     error.statusCode = 401;
                     throw error;
                 }
+                const result = [];
+                for (let i = 0; i < documents.length; i++) {
+                    result.push({
+                        id: documents[i]._id,
+                        details: `${documents.manufacturer} ${documents.model} ${documents.license}`
+                    })
+                }
                 res.status(200).json({
-                    data: documents
+                    data: result
                 });
             })
             .catch(err => {
@@ -151,7 +158,7 @@ exports.getInterested = (req, res, next) => {
                     const user = await User.findById(interested[i])
                     interestedList.push({
                         id: user._id,
-                        name: `${user.firstName} ${user.lastName}`
+                        details: `${user.firstName} ${user.lastName}`
                     })
                 }
                 res.status(200).json({
@@ -178,8 +185,16 @@ exports.getPosts = (req, res, next) => {
                     error.statusCode = 401;
                     throw error;
                 }
+                const result = [];
+                for (let i = 0; i < documents.length; i++) {
+                    result.push({
+                        id: documents[i]._id,
+                        origin: documents[i].origin,
+                        destination: documents[i].destination,
+                    })
+                }
                 res.status(200).json({
-                    data: documents
+                    data: result
                 });
             })
             .catch(err => {
