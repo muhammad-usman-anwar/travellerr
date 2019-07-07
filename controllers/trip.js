@@ -127,7 +127,7 @@ exports.getCars = (req, res, next) => {
                 for (let i = 0; i < documents.length; i++) {
                     result.push({
                         id: documents[i]._id,
-                        details: `${documents.manufacturer} ${documents.model} ${documents.license}`
+                        details: `${documents[i].manufacturer} ${documents[i].model} ${documents[i].license}`
                     })
                 }
                 res.status(200).json({
