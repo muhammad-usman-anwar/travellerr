@@ -20,7 +20,8 @@ const {
     is_initiator,
     is_allowed_to_start,
     is_allowed_to_manupulate,
-    is_rating_allowed
+    is_rating_allowed,
+    is_requested
 } = require('../middleware/trip');
 const {
     validationErrors
@@ -101,11 +102,30 @@ router.post("/:id/finish",
             })
         }),
         body('latitude').not().isEmpty(),
-        body('longitude').not().isEmpty()
+        body('longitude').not().isEmpty(),
+        body('users').not().isEmpty().isArray(),
+        body('distance').not().isEmpty(),
     ],
     validationErrors,
     is_initiator,
     TripController.finish);
+
+router.post("/:id/finishRide",
+    is_auth,
+    [
+        param('id').custom((value, req) => {
+            return Trip.findById(value).then(trip => {
+                if (!trip) Promise.reject('Invalid Trip Id')
+            })
+        }),
+        body('latitude').not().isEmpty(),
+        body('longitude').not().isEmpty(),
+        body('users').not().isEmpty().isArray(),
+        body('distance').not().isEmpty(),
+    ],
+    validationErrors,
+    is_initiator,
+    TripController.finishRide);
 
 router.get('/:id', is_auth, [
         param('id').custom((value, req) => {
@@ -127,7 +147,7 @@ router.get('/:id/accept', is_auth,
         })
     ],
     validationErrors,
-    is_allowed_to_manupulate,
+    is_requested,
     TripController.accept
 )
 
@@ -140,7 +160,7 @@ router.get('/:id/reject', is_auth,
         }),
     ],
     validationErrors,
-    is_allowed_to_manupulate,
+    is_requested,
     TripController.reject
 )
 

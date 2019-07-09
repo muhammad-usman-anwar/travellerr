@@ -48,7 +48,7 @@ const tripSchema = new Schema({
     type: String,
     required: false
   },
-  destination: {
+  destinations: [{
     latitude: {
       type: String,
       required: false
@@ -57,7 +57,7 @@ const tripSchema = new Schema({
       type: String,
       required: false
     }
-  },
+  }],
 });
 
 module.exports = mongoose.model("Trip", tripSchema);
