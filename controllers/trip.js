@@ -5,28 +5,40 @@ const User = require('../models/user')
 const Trip = require('../models/trip')
 const Post = require('../models/post')
 const Car = require('../models/car')
+const OngoingTrip = require('../models/ongoingTrip')
 
 const TripState = require('../tripState')
+
+//fare calculation function
+function calFare(noOfUsers, distance, rate) {
+    return (distance * rate) / noOfUsers;
+}
 
 exports.create = async (req, res, next) => {
     try {
         const postDoc = await Post.findById(req.body.postId)
         if (!postDoc) throw new Error('Internal server error')
-        const users = [req.userId];
-        users.concat(req.body.poolers)
         new Trip({
                 initiator: req.userId,
-                users: users,
+                users: [req.userId],
                 carId: req.body.carId,
                 postId: postDoc._id,
                 state: 'INITIATED'
             })
             .save()
             .then(result => {
-                res.status(201).json({
-                    error: false,
-                    message: 'trip created'
-                })
+                new OngoingTrip({
+                        tripId: result._id,
+                        requested: req.body.poolers,
+                        state: 'INITIATED'
+                    }).save()
+                    .then(doc => {
+                        if (!doc) throw new Error('INternal System Error');
+                        res.status(201).json({
+                            error: false,
+                            message: 'trip created'
+                        })
+                    })
             })
             .catch(err => {
                 console.log(err);
@@ -51,15 +63,30 @@ exports.start = (req, res, next) => {
                 state: 'ONGOING'
             })
             .then(result => {
-                TripState.add({
-                    id: req.params.id,
-                    latitude: req.body.latitude,
-                    longitude: req.body.longitude
-                })
-                IO.setRoomEvent(req.params.id)
-                res.status(200).json({
-                    error: false,
-                    message: 'trip started'
+                const fare = [];
+                for (let index = 0; index < result.users.length; index++) {
+                    if (result.users[index] === req.userId) continue;
+                    fare.push({
+                        userId: result.users[index],
+                        fare: 0
+                    })
+                }
+                OngoingTrip.findOneAndUpdate({
+                    tripId: req.params.id
+                }, {
+                    position: {
+                        latitude: req.body.latitude,
+                        longitude: req.body.longitude
+                    },
+                    state: 'ONGONG',
+                    fare: fare,
+                }).then(doc => {
+                    if (!doc) throw new Error('INternal Server Error');
+                    IO.setRoomEvent(req.params.id)
+                    res.status(200).json({
+                        error: false,
+                        message: 'trip started'
+                    })
                 })
             })
             .catch(err => {
@@ -71,6 +98,13 @@ exports.start = (req, res, next) => {
         next(error)
     }
 };
+
+function findFareUser(fareArray, userId) {
+    for (let index; index < fareArray; index++) {
+        if (fareArray[index].userId === userId) return index;
+    }
+    return null;
+}
 
 exports.finish = (req, res, next) => {
     try {
@@ -83,10 +117,31 @@ exports.finish = (req, res, next) => {
                 state: 'COMPLETED'
             })
             .then(result => {
-                res.status(200).json({
-                    error: false,
-                    message: 'trip completed'
-                })
+                OngoingTrip.findOne({
+                        tripId: req.params.id
+                    })
+                    .then(doc => {
+                        if (!doc) throw new Error('Internal Server Error')
+                        const fare = [];
+                        for (let i = 0; i < req.body.users.length; i++) {
+                            const index = findFareUser(doc.fare, req.body.users[i]);
+                            if (!index) throw new Error('Internal Server Error')
+                            doc.fare[index].fare += calFare(doc.fare.length + 1, req.body.distance, 10.0);
+                            fare.push(doc.fare[index]);
+                        }
+                        doc.state = 'COMPLETED';
+                        doc.position.latitude = req.body.latitude;
+                        doc.position.longitude = req.body.longitude;
+                        doc.save()
+                            .then(resDoc => {
+                                if (!resDoc) throw new Error('Internal Serer Error')
+                                res.status(200).json({
+                                    error: false,
+                                    message: 'trip completed',
+                                    data: fare
+                                })
+                            })
+                    })
             })
             .catch(err => {
                 throw err
@@ -96,6 +151,37 @@ exports.finish = (req, res, next) => {
         next(error)
     }
 };
+
+exports.finishRide = (req, res, next) => {
+    OngoingTrip.findOne({
+            tripId: req.params.id
+        })
+        .then(doc => {
+            if (!doc) throw new Error('Internal Server Error')
+            const fare = [];
+            for (let i = 0; i < req.body.users.length; i++) {
+                const index = findFareUser(doc.fare, req.body.users[i]);
+                if (!index) throw new Error('Internal Server Error')
+                doc.fare[index].fare += calFare(doc.fare.length + 1, req.body.distance, 10.0);
+                fare.push(doc.fare[index]);
+            }
+            doc.position.latitude = req.body.latitude;
+            doc.position.longitude = req.body.longitude;
+            doc.save()
+                .then(resDoc => {
+                    if (!resDoc) throw new Error('Internal Serer Error')
+                    res.status(200).json({
+                        error: false,
+                        message: 'Ride completed',
+                        data: fare
+                    })
+                })
+        }).catch(error => {
+            if (!error.statusCode) error.statusCode = 500
+            next(error)
+        })
+}
+
 
 exports.getTrip = async (req, res, next) => {
     try {
@@ -207,18 +293,33 @@ exports.getPosts = (req, res, next) => {
 }
 
 exports.accept = (req, res, next) => {
-    res.status(200).json({
-        message: "Accepted"
-    })
+    Trip.findById(req.params.id)
+        .then(doc => {
+            doc.users.push(req.userId);
+            doc.save()
+                .then(result => {
+                    if (!result) throw new Error('Internal System Error');
+                    res.status(200).json({
+                        error: false,
+                        message: "Accepted"
+                    })
+                })
+        })
+        .catch(error => {
+            if (!error.statusCode) error.statusCode = 500
+            next(error)
+        })
 }
 
 exports.reject = (req, res, next) => {
     try {
-        Trip.findById(req.params.id)
+        OngoingTrip.findOne({
+                tripId: req.params.id
+            })
             .then(tripDoc => {
-                tripDoc.users.forEach((value, index, array) => {
+                tripDoc.requested.forEach((value, index, array) => {
                     if (value === req.userId) {
-                        tripDoc.users.splice(index, 1);
+                        tripDoc.requested.splice(index, 1);
                         tripDoc.save()
                             .then(result => {
                                 if (!result) throw new Error('Internal server Error!')
@@ -247,13 +348,15 @@ exports.cancel = (req, res, next) => {
     try {
         Trip.findByIdAndDelete(req.params.id)
             .then(result => {
-                if (!result) {
-                    throw new Error("Internal Server Error")
-                }
-                res.status(200).json({
-                    error: false,
-                    message: 'Trip canceled'
-                })
+                if (!result) throw new Error("Internal Server Error")
+                OngoingTrip.findOneAndDelete(req.params.id)
+                    .then(flag => {
+                        if (!flag) throw new Error("Internal Server Error")
+                        res.status(200).json({
+                            error: false,
+                            message: 'Trip canceled'
+                        })
+                    })
             })
             .catch(err => {
                 throw err

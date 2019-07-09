@@ -1,5 +1,6 @@
 const Car = require('../models/car')
 const Trip = require('../models/trip')
+const OngoingTrip = require('../models/ongoingTrip')
 
 exports.is_allowed_to_create = (req, res, next) => {
     Car.find({
@@ -82,12 +83,28 @@ exports.is_rating_allowed = (req, res, next) => {
 
 exports.is_allowed_to_start = (req, res, next) => {
     Trip.find({
+            initiator: req.userId,
             state: 'ONGOING'
         })
         .countDocuments()
         .then(num => {
             if (num > 0) throw new Error('You already have an ongoing trip');
             next();
+        })
+        .catch(err => {
+            if (!err.statusCode) err.statusCode = 400;
+            next(err)
+        })
+}
+
+exports.is_requested = (req, res, next) => {
+    OngoingTrip.find({
+            requested: req.userId
+        })
+        .countDocuments()
+        .then(num => {
+            if (num > 0) next();
+            else throw new Error('You are not requested to join trip');
         })
         .catch(err => {
             if (!err.statusCode) err.statusCode = 400;
