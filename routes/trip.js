@@ -223,4 +223,6 @@ router.get('/:id/update', is_auth, [
     TripController.getUpdateOngoingTrip
 )
 
+router.get('/requested-trip', is_auth, is_allowed_to_manupulate, TripController.getRequested);
+
 module.exports = router;

@@ -448,3 +448,39 @@ exports.getUpdateOngoingTrip = (req, res, next) => {
         next(error)
     }
 }
+
+module.exports.getRequested = (req, res, next) => {
+    OngoingTrip.findOne({
+            requested: req.userId
+        })
+        .then(doc => {
+            if (!doc) throw new Error();
+            Trip.findById(doc.tripId)
+                .then(async tripDoc => {
+                    const users = [];
+                    for (let index = 0; index < doc.requested.length; index++) {
+                        const userDoc = await User.findById(doc.requested[index]);
+                        if (!userDoc) throw new Error('Internal Server Error');
+                        users.push({
+                            id: userDoc._id,
+                            name: userDoc.firstName + ' ' + userDoc.lastName
+                        })
+                    }
+                    res.status(200).json({
+                        error: false,
+                        data: {
+                            startTime: tripDoc.startTime,
+                            arrivalTime: tripDoc.arrivalTime,
+                            initiator: tripDoc.initiator,
+                            users: users,
+                            destination: tripDoc.destination,
+                            origin: tripDoc.origin
+                        }
+                    })
+                })
+        })
+        .catch(error => {
+            if (!error.statusCode) error.statusCode = 500
+            next(error)
+        })
+}
