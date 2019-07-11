@@ -1,6 +1,6 @@
 {
   "name": "travellerr",
-  "version": "0.80.120",
+  "version": "0.81.120",
   "description": "Rest API for traveller",
   "main": "app.js",
   "scripts": {
