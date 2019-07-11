@@ -16,6 +16,7 @@ function calFare(noOfUsers, distance, rate) {
 
 exports.create = async (req, res, next) => {
     try {
+        const io = IO.getIO();
         const postDoc = await Post.findById(req.body.postId)
         if (!postDoc) throw new Error('Internal server error')
         new Trip({
@@ -38,6 +39,9 @@ exports.create = async (req, res, next) => {
                             error: false,
                             message: 'trip created'
                         })
+                        io.emit("trip-requested", {
+                            tripId: doc._id
+                        });
                     })
             })
             .catch(err => {
@@ -87,6 +91,7 @@ exports.start = (req, res, next) => {
                         error: false,
                         message: 'trip started'
                     })
+
                 })
             })
             .catch(err => {
@@ -123,11 +128,15 @@ exports.finish = (req, res, next) => {
                     .then(doc => {
                         if (!doc) throw new Error('Internal Server Error')
                         const fare = [];
-                        for (let i = 0; i < req.body.users.length; i++) {
-                            const index = findFareUser(doc.fare, req.body.users[i]);
-                            if (!index) throw new Error('Internal Server Error')
-                            doc.fare[index].fare += calFare(doc.fare.length + 1, req.body.distance, 10.0);
-                            fare.push(doc.fare[index]);
+                        let j = 0;
+                        for (let i = 0; i < doc.fare.length; i++) {
+                            let index = -1;
+                            if (j < req.body.users.length) {
+                                index = findFareUser(doc.fare[i], req.body.users[j]);
+                            }
+                            doc.fare[i].fare += calFare(doc.fare.length + 1, req.body.distance, 10.0);
+                            if (index !== -1) fare.push(doc.fare[index]);
+                            index = -1;
                         }
                         doc.state = 'COMPLETED';
                         doc.position.latitude = req.body.latitude;
@@ -159,11 +168,14 @@ exports.finishRide = (req, res, next) => {
         .then(doc => {
             if (!doc) throw new Error('Internal Server Error')
             const fare = [];
-            for (let i = 0; i < req.body.users.length; i++) {
-                const index = findFareUser(doc.fare, req.body.users[i]);
-                if (!index) throw new Error('Internal Server Error')
-                doc.fare[index].fare += calFare(doc.fare.length + 1, req.body.distance, 10.0);
-                fare.push(doc.fare[index]);
+            for (let i = 0; i < doc.fare.length; i++) {
+                let index = -1;
+                if (j < req.body.users.length) {
+                    index = findFareUser(doc.fare[i], req.body.users[j]);
+                }
+                doc.fare[i].fare += calFare(doc.fare.length + 1, req.body.distance, 10.0);
+                if (index !== -1) fare.push(doc.fare[index]);
+                index = -1;
             }
             doc.position.latitude = req.body.latitude;
             doc.position.longitude = req.body.longitude;
@@ -303,6 +315,7 @@ exports.accept = (req, res, next) => {
                         error: false,
                         message: "Accepted"
                     })
+                    io.to(req.params.id).emit("offer-accepted");
                 })
         })
         .catch(error => {
@@ -327,6 +340,7 @@ exports.reject = (req, res, next) => {
                                     error: false,
                                     message: 'Offer Rejected'
                                 })
+                                io.to(req.params.id).emit("offer-rejected");
                             })
                             .catch(err => {
                                 throw err
