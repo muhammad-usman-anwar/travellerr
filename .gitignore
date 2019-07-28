@@ -3,3 +3,5 @@
 
 start-server.bat
 start-vscode.bat
+
+package-lock.json
