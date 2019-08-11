@@ -47,7 +47,7 @@ mongoose
   .then(result => {
     const server = app.listen(3030);
     EmailService.init(
-      "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"
+      "YOUR_API_KEY"
     );
     const io = require("./socket").init(server);
   })
